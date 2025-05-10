@@ -1,15 +1,16 @@
-//Routes for authentication
+//Routes for authentication and authorization
 const express = require("express");
 const router = express.Router();
 const jwt = require("jsonwebtoken");
 
 // Fetching user model
-const User = require("../models/user")
+const User = require("../models/user");
 
 //Adding user
 router.post("/register", async (req, res) => {
     try {
-        const { username, password, email, firstname, surname } = req.body;
+        let { username, password, email, firstname, surname } = req.body;
+        
 
         const user = new User({ username, password, email, firstname, surname });
 
@@ -17,7 +18,7 @@ router.post("/register", async (req, res) => {
         return res.status(201).json({ message: "User created"});
 
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ error: "Server error" });
     }
 });
 
@@ -57,5 +58,46 @@ router.post("/login", async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 });
+
+//Protected route
+router.get("/protected", authenticateToken, async (req, res) => {
+    const username = req.body.username
+    const user = await User.findOne({ username });
+
+    let loggedUser = {
+        username: username,
+        email: user.email,
+        firstname: user.firstname,
+        surname: user.surname,
+        created: user.created
+    }
+    
+    //Sending user info
+    res.json({ loggedUser })
+});
+
+//Middleware validating Token
+function authenticateToken(req, res, next) {
+    //Checking authentication header
+    const authHeader = req.headers["authorization"];
+    const token = authHeader && authHeader.split(" ")[1] 
+
+    //Token missing
+    if(token == null) {
+        res.status(401).json({ message: "Not authorized for this route - token missing"});
+    }
+
+    //Verifying token
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (error, username) => {
+        if(error) {
+            return res.status(403).json({ message: "Invalid JWT"});
+        }
+
+        req.username = username;
+
+        //Sending back to route if correct token
+        next();
+    })
+}
 
 module.exports = router;
