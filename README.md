@@ -15,7 +15,7 @@ Datan som lagras är:
 
 ### Länk
 
-Grundlänken till API:et är [] **Fyll på här**
+Grundlänken till API:et är [https://dt207g-moment4-1-4grw.onrender.com/api](https://dt207g-moment4-1-4grw.onrender.com/api).
 
 Följande router kan användas för att använda API:et:
 | Metod     | Länk           | Resultat                                 |
