@@ -1,6 +1,7 @@
 //Routes for authentication
 const express = require("express");
 const router = express.Router();
+const jwt = require("jsonwebtoken");
 
 // Fetching user model
 const User = require("../models/user")
@@ -39,8 +40,17 @@ router.post("/login", async (req, res) => {
         const passwordMatch = await user.comparePassword(password);
         if(!passwordMatch) {
             return res.status(401).json({ error: "Invalid username or password" });
+
         } else {
-            res.status(200).json({ message: "User logged in" });
+            //Creating JWT
+            const payload = { username: username };
+            const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, { expiresIn: "1h"});
+            const response = {
+                message: "User logged in",
+                token: token
+            }
+
+            res.status(200).json({ response });
         }
 
     } catch (error) {
