@@ -65,7 +65,7 @@ router.post("/login", async (req, res) => {
 
 //Protected route
 router.get("/protected", authenticateToken, async (req, res) => {
-    const username = req.username
+    const username = req.body.username
     const user = await User.findOne({ username });
 
     let loggedUser = {
